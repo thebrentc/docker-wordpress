@@ -1,0 +1,40 @@
+# https://buddy.works/guides/wordpress-docker-kubernetes-part-1
+# https://stackoverflow.com/questions/45774221/how-to-run-docker-exec-on-a-docker-compose-yml
+version: '3'
+
+services:
+  wp:
+    build: .
+    ports:
+      - "8000:80"
+    environment:
+      #WORDPRESS_DB_HOST: mysql:3306
+      WORDPRESS_DB_USER: user
+      WORDPRESS_DB_PASSWORD: toor
+      WORDPRESS_DB_NAME: wp
+  mysql:
+    image: "mysql:latest"
+    volumes:
+       - db_data:/var/lib/mysql
+       - ./wp.sql:/docker-entrypoint-initdb.d/wp.sql
+       - ./docker-mysql-init.sql:/docker-entrypoint-initdb.d/docker-mysql-init.sql
+    environment:
+      MYSQL_ROOT_PASSWORD: toor
+      MYSQL_DATABASE: wp
+      MYSQL_USER: user
+      MYSQL_PASSWORD: toor
+
+  #mysqlinit:
+  #    image: mysql:latest
+  #    volumes:
+  #       - ./wp.sql:/wp.sql
+  #    command: bash -c "sleep 20 && mysql -h mysql -uroot -ptoor wp < /wp.sql"
+  #    command: bash -c "sleep 20 && mysql -h mysql -uroot -ptoor wp < /docker-mysql-init.sql"
+
+volumes:
+    db_data: {}
+
+# Then:
+# docker inspect wp_mysql_1 -> IPAddress
+# mysql -h 172.18.0.2 -u root -p wp < wp.sql
+# mysql -h 172.18.0.2 -u root -p wp < docker-mysql-init.sql
